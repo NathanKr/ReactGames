@@ -11,6 +11,7 @@ const App = () => {
   const [bulletY, setBulletY] = useState(100);
   const [bulletFired, setBulletFired] = useState(false);
 
+
   const playerY = window.innerHeight - 50;
   const playerXRef = useRef();
 
@@ -18,12 +19,15 @@ const App = () => {
     playerXRef.current = playerX;
   }, [playerX]);
 
+  
 
   const handleBullet = () => {
+    console.log(bulletY)
     if (bulletY > 0) {
       setBulletY(bulletY - constants.ballDy);
     } else {
       setBulletFired(false);
+      console.log(`bulletY : ${bulletY} `);
       setBulletY(playerY - 20);
       setBulletX(playerX);
     }
