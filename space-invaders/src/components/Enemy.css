@@ -1,5 +1,5 @@
-.Bullet {
-  color: aqua;
+.Enemy {
+  color: orange;
   position: absolute;
   border: 1px solid red;
 }

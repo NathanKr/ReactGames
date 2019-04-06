@@ -3,14 +3,25 @@ import "./App.css";
 import Player from "./Player";
 import Bullet from "./Bullet";
 import { addKeyListener, removeKeyListener } from "../logic/keyListeners";
-import constants from "../logic/constants";
+import {
+  bulletDy,
+  enemyDy,
+  playerDx,
+  bulletWidth,
+  bulletHeight,
+  enemyWidth,
+  enemyHeight
+} from "../logic/constants";
+import { checkCollision } from "../logic/utils";
+import Enemy from "./Enemy";
 
 const App = () => {
   const [playerX, setplayerX] = useState(100);
   const [bulletX, setBulletX] = useState(100);
   const [bulletY, setBulletY] = useState(100);
+  const [enemyX, setEnemyX] = useState(100);
+  const [enemyY, setEnemyY] = useState(0);
   const [bulletFired, setBulletFired] = useState(false);
-
 
   const playerY = window.innerHeight - 50;
   const playerXRef = useRef();
@@ -19,35 +30,57 @@ const App = () => {
     playerXRef.current = playerX;
   }, [playerX]);
 
-  
-
   const handleBullet = () => {
-    console.log(bulletY)
-    if (bulletY > 0) {
-      setBulletY(bulletY - constants.ballDy);
+    if (bulletFired) {
+      if (bulletY > 0) {
+        setBulletY(bulletY - bulletDy);
+      } else {
+        setBulletFired(false);
+        console.log(`bulletY : ${bulletY} `);
+        setBulletY(playerY - 20);
+        setBulletX(playerX);
+      }
     } else {
-      setBulletFired(false);
-      console.log(`bulletY : ${bulletY} `);
-      setBulletY(playerY - 20);
       setBulletX(playerX);
     }
   };
 
-  useEffect(() => {
-    if (bulletFired) {
-      window.requestAnimationFrame(handleBullet);
+  const handleEnemy = () => {
+    setEnemyY(enemyY + enemyDy);
+  };
+
+  const handleShapes = () => {
+    handleBullet();
+    handleEnemy();
+    if (
+      checkCollision(
+        bulletX,
+        bulletY,
+        bulletWidth,
+        bulletHeight,
+        enemyX,
+        enemyY,
+        enemyWidth,
+        enemyHeight
+      )
+    ) {
+      console.log("colision");
     }
+  };
+
+  useEffect(() => {
+    window.requestAnimationFrame(handleShapes);
   });
 
   const keydownListener = evt => {
     console.log(`key press ${evt.key}`);
     switch (evt.key) {
       case "ArrowRight":
-        setplayerX(playerXRef.current + constants.playerDx);
+        setplayerX(playerXRef.current + playerDx);
         break;
 
       case "ArrowLeft":
-        setplayerX(playerXRef.current - constants.playerDx);
+        setplayerX(playerXRef.current - playerDx);
         break;
 
       case "Enter":
@@ -64,6 +97,11 @@ const App = () => {
     return () => removeKeyListener(keydownListener);
   }, []); // done once on mount
 
+  const enemyElement = useMemo(() => <Enemy x={enemyX} y={enemyY} />, [
+    enemyX,
+    enemyY
+  ]);
+
   const bulletElement = useMemo(() => <Bullet x={bulletX} y={bulletY} />, [
     bulletX,
     bulletY
@@ -75,6 +113,7 @@ const App = () => {
 
   return (
     <div className="App">
+      {enemyElement}
       {bulletElement}
       {playerElement}
     </div>
